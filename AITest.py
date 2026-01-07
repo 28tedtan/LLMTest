@@ -16,7 +16,7 @@ def get_completion(prompt, model="gpt-4o-mini"):
         model=model,
         messages=messages,
         temperature=1, # this is the degree of randomness of the model's output
-    )
+    ) 
     return response.choices[0].message.content
 
 
