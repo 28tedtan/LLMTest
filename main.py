@@ -1,80 +1,46 @@
 import streamlit as st
 from openai import OpenAI
-from getpass import getpass
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import os
 
 
-
-
-# set-up ######################################################################################################################
+# -------------------- SETUP ------------------------
 load_dotenv()
 api_key = os.getenv("openai_key")
 client = OpenAI(api_key=api_key)
 
 
-#response model ###############################################################################################################
+# -------------------- RESPONSE MODEL ----------------
 class CodeResponse(BaseModel):
     code: str
     explanation: str
 
 
-
-
-
-###########################################################################################################################################################################################
-#MAIN CODE ######################################################################################### MAIN CODE ############################################################################
-st.title("OpenAI Codex")
-
-
-user_prompt = st.text_area("Enter a prompt")
-if user_prompt: get_completion()
-
-st.code(result.code, language=result.language.lower())
-
-st.frame()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# END OF MAIN CODE #############################################################################################################################################################################
-################################################################################################################################################################################################
-
-
-#Call model and init ##########################################################################################################
+# -------------------- COMPLETION FUNCTION -----------
 def get_completion(prompt, model="gpt-4o-mini"):
-    messages = [
-        {"role": "user", "content": user_prompt}
-        #system prompt ##########################################################################################################
-        {"role": "system", "content": """- You are a helpful assistant that can help writing code in most programming languages such as Python, JavaScript, HTML, CSS, SQL, SwiftUI, React, etc.
-        You must give clear and concise instructions to the user.
-        Comments in code are highly encouraged and beneficial to the user.
-        after the code is written, you should explain the code to the user in a way that is easy to understand outside of the code block."""
-    }
 
-        ]
-    response = client.chat.completions.create(
+    messages = [
+#---------------------- Prompt Engineering------------
+        {"role": "system", "content": """
+You are a helpful programming assistant.
+Return ONLY a JSON object matching this Pydantic model:
+- code: the generated code
+- explanation: a simple explanation of the code
+"""},
+#------------------------------------------------------
+
+
+        {"role": "user", "content": prompt}
+    ]
+
+    response = client.chat.completions.parse(
         model=model,
         messages=messages,
-        response_format: CodeResponse
+        response_format=CodeResponse
     )
-    if message.parsed:
-        result = message.parsed
+
+    return response.choices[0].message.parsed
 
 
 
@@ -82,10 +48,27 @@ def get_completion(prompt, model="gpt-4o-mini"):
 
 
 
+# -------------------- STREAMLIT UI -------------------
+st.title("CP little helper")
 
+user_prompt = st.text_area("Enter a prompt")
 
+if st.button("Generate Code"):
+    if not user_prompt:
+        st.error("Please enter a prompt.")
+    else:
+        # Optional token safety
+        if len(user_prompt) > 3000:
+            st.error("You are wasting too many tokens, rejected.")
+        else:
+            result = get_completion(user_prompt)
 
-#Response #########################################################################################
-response = get_completion(prompt)
-print(response)
+            col1, col2 = st.columns(2)
 
+            with col1:
+                st.subheader("Generated Code")
+                st.code(result.code, language="python", line_numbers=True)
+
+            with col2:
+                st.subheader("Explanation")
+                st.write(result.explanation)
