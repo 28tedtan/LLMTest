@@ -51,13 +51,33 @@ def get_completion(prompt, model="gpt-4o-mini"):
 # -------------------- STREAMLIT UI -------------------
 st.title("CP AI generator")
 
-user_prompt = st.chat_input("Enter a prompt")
+# Persist chat input attributes across reruns
+# Start with the initial prompt label; after first submit we flip to "Follow up".
+if "chattext" not in st.session_state:
+    st.session_state.chattext = "Enter a coding prompt"
+if "disabledtext" not in st.session_state:
+    st.session_state.disabledtext = False
+if "has_sent_prompt" not in st.session_state:
+    st.session_state.has_sent_prompt = False
+
+# Once a prompt has been sent, make the label permanently "Follow up"
+if st.session_state.has_sent_prompt:
+    st.session_state.chattext = "Follow up"
+
+chattext = st.session_state.chattext
+disabledtext = st.session_state.disabledtext
+
+user_prompt = st.chat_input(chattext, disabled=disabledtext, max_chars=3000)
 
 if user_prompt:
-    # Optional token safety
+    # Optional token safety 2nd wave type shi
     if len(user_prompt) > 3000:
-        st.error("You are wasting too many tokens, rejected.")
+        st.error("You are wasting too many tokens, rejected. How are you even doing this...")
     else:
+        # Keep chat input attributes consistent across reruns
+        st.session_state.chattext = "Follow up"
+        st.session_state.disabledtext = False
+        # Status
         with st.status("Thinking...", expanded=False) as status:
             starttime = time.perf_counter()
             result = get_completion(user_prompt)
@@ -67,10 +87,16 @@ if user_prompt:
             elapsed_int = int(round(elapsed_seconds))  # save as integer seconds
             st.session_state["last_response_time_s"] = elapsed_int
 
+            if  elapsed_seconds > 60:
+                status.update(label="Taking a while...")
+
             status.update(
                 label=f"Completed               ({elapsed_seconds:.1f}s)" 
             )
+            disabledtext = False
 
+
+        #code generation
         col1, col2 = st.columns(2)
 
         with col1:
