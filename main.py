@@ -78,17 +78,20 @@ if user_prompt:
         st.session_state.chattext = "Follow up"
         st.session_state.disabledtext = False
         # Status
+
         with st.status("Thinking...", expanded=False) as status:
             starttime = time.perf_counter()
             result = get_completion(user_prompt)
             endtime = time.perf_counter()
 
-            elapsed_seconds = endtime - starttime  # float seconds, e.g. 2.3
-            elapsed_int = int(round(elapsed_seconds))  # save as integer seconds
+            elapsed_seconds = endtime - starttime  
+            elapsed_int = int(round(elapsed_seconds))  
             st.session_state["last_response_time_s"] = elapsed_int
 
             if  elapsed_seconds > 60:
                 status.update(label="Taking a while...")
+
+            st.toast("Completed!", icon="✅")
 
             status.update(
                 label=f"Completed               ({elapsed_seconds:.1f}s)" 
