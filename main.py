@@ -51,7 +51,7 @@ def get_completion(prompt, model="gpt-4o-mini"):
 
 
 # -------------------- STREAMLIT UI -------------------
-st.title("CP AI generator")
+st.title("CP Little Helpers")
 
 # Persist chat input attributes across reruns
 # Start with the initial prompt label; after first submit we flip to "Follow up".
