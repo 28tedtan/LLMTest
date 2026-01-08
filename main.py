@@ -7,8 +7,10 @@ import time
 
 
 # -------------------- SETUP ------------------------
-load_dotenv()
-api_key = os.getenv("openai_key")
+# load_dotenv()
+# api_key = os.getenv("openai_key")
+
+api_key = st.secrets["openai_key"]
 client = OpenAI(api_key=api_key)
 
 # Load training instructions from external file
