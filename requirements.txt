@@ -1,6 +1,2 @@
 streamlit
 openai
-dotenv
-pydantic
-os
-time
