@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import os
 import time
-
-
 # -------------------- SETUP ------------------------
 # load_dotenv()
 # api_key = os.getenv("openai_key")
@@ -16,14 +14,10 @@ client = OpenAI(api_key=api_key)
 # Load training instructions from external file
 with open(".traininginstructions", "r") as f:
     training_instructions = f.read()
-
-
 # -------------------- RESPONSE MODEL ----------------
 class CodeResponse(BaseModel):
     code: str
     explanation: str
-
-
 # -------------------- COMPLETION FUNCTION -----------
 def get_completion(prompt, model="gpt-4o-mini"):
 
@@ -31,8 +25,6 @@ def get_completion(prompt, model="gpt-4o-mini"):
 #---------------------- Prompt Engineering------------
         {"role": "system", "content": training_instructions},
 #------------------------------------------------------
-
-
         {"role": "user", "content": prompt}
     ]
 
@@ -43,18 +35,10 @@ def get_completion(prompt, model="gpt-4o-mini"):
     )
 
     return response.choices[0].message.parsed
-
-
-
-
-
-
-
 # -------------------- STREAMLIT UI -------------------
 st.title("CP Little Helpers")
 
 # Persist chat input attributes across reruns
-# Start with the initial prompt label; after first submit we flip to "Follow up".
 if "chattext" not in st.session_state:
     st.session_state.chattext = "Enter a coding prompt"
 if "disabledtext" not in st.session_state:
@@ -69,9 +53,19 @@ if st.session_state.has_sent_prompt:
 chattext = st.session_state.chattext
 disabledtext = st.session_state.disabledtext
 
+# Add instruction text above chat input (only shown before first prompt)
+if not st.session_state.has_sent_prompt:
+    st.markdown(
+        '<p style="color: gray; font-size: 14px; margin-bottom: 5px;">💡 Enter your coding prompt below to get started</p>',
+        unsafe_allow_html=True
+    )
+
 user_prompt = st.chat_input(chattext, disabled=disabledtext, max_chars=3000)
 
 if user_prompt:
+    # Mark that a prompt has been sent
+    st.session_state.has_sent_prompt = True
+    
     # Optional token safety 2nd wave type shi
     if len(user_prompt) > 3000:
         st.error("You are wasting too many tokens, rejected. How are you even doing this...")
@@ -99,7 +93,6 @@ if user_prompt:
                 label=f"Completed               ({elapsed_seconds:.1f}s)" 
             )
             disabledtext = False
-
 
         #code generation
         col1, col2 = st.columns(2)
