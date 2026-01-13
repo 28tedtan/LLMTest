@@ -56,7 +56,7 @@ disabledtext = st.session_state.disabledtext
 # Add instruction text above chat input (only shown before first prompt)
 if not st.session_state.has_sent_prompt:
     st.markdown(
-        '<p style="color: gray; font-size: 14px; margin-bottom: 5px;">💡 Enter your coding prompt below to get started</p>',
+        '<p style="color: gray; font-size: 14px; margin-bottom: 5px;">Enter a coding prompt or a follow-up down below</p>',
         unsafe_allow_html=True
     )
 
