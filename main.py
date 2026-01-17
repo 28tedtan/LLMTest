@@ -166,3 +166,4 @@ if user_prompt:
         
         # Rerun to show the new entry
         st.rerun()
+    
